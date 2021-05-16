@@ -1,5 +1,5 @@
 # Pokekodex
 
 With SwiftUI and Combine framework.
-![Pokemon list](https://github.com/iamsenzy/Pokekodex/images/home.png)
-![Pokemon](https://github.com/iamsenzy/Pokekodex/images/pokemon.png)
+![Pokemon list](/images/home.png)
+![Pokemon](/images/pokemon.png)
