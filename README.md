@@ -1,5 +1,5 @@
 # Pokekodex
 
 With SwiftUI and Combine framework.
-![Pokemon list](/images/home.png)
-![Pokemon](/images/pokemon.png)
+![Pokemon list](/images/home.png =250x)
+![Pokemon](/images/pokemon.png =250x)
