@@ -37,7 +37,7 @@ struct PokemonListView: View {
                     }
                     Button("Load more") {
                         limit += 10
-                        pokemonListVM.fetchUsers(endpoint: .pokemonList(limit))
+                        pokemonListVM.fetchPokemons(endpoint: .pokemonList(limit))
                     }
                 }
                 .listStyle(InsetGroupedListStyle())
@@ -45,7 +45,7 @@ struct PokemonListView: View {
         }
         .navigationTitle("Pokemons")
         .onAppear{
-            pokemonListVM.fetchUsers(endpoint: .pokemonList(limit))
+            pokemonListVM.fetchPokemons(endpoint: .pokemonList(limit))
         }
     }
 }

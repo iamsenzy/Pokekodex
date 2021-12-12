@@ -18,53 +18,70 @@ struct PokemonView: View {
     @State var xScale: CGFloat = 0
     @State var yScale: CGFloat = 0
     
-    @Binding var pokemonUrl: String
-    @State private var pokemon: [User]
-    var backgroundColor: Color
-    @State var color: Color = .red
-    @State var pokemonImage: String = ""
+    var name: String
+    @StateObject var pokemonViewModel = PokemonViewModel()
     
     var body: some View {
         ZStack {
-            backgroundColor
-            Circle()
-                .fill(color)
-                .scaleEffect(CGSize(width: xScale, height: yScale))
-                .offset(y: 0)
-            VStack(alignment: .leading) {
-                btnBack
-                    .padding([.top], 24)
-                    .padding([.bottom], 30)
-                    .opacity(0)
-                Text(verbatim: pokemon[0].name)
-                    .font(.largeTitle).bold()
-                    .foregroundColor(.white)
-                    .padding([.leading], 16)
-                if let first = pokemon[0].types.first ?? "" {
-                    Text("\(first) type Pokemon")
-                        .font(.subheadline).italic()
+            if !pokemonViewModel.detailedPokemon.isEmpty {
+                Circle()
+                    .fill(pokemonViewModel.detailedPokemon[0].backgroundColor)
+                    .scaleEffect(CGSize(width: xScale, height: yScale))
+                    .offset(y: 0)
+                    .onAppear {
+                        let baseAnimation = Animation.easeInOut(duration: 0.5)
+                        withAnimation(baseAnimation) {
+                            xScale = 10.0
+                            yScale = 10.0
+                        }
+                    }
+                VStack(alignment: .leading) {
+                    btnBack
+                        .padding([.top], 24)
+                        .padding([.bottom], 30)
+                        .opacity(0)
+                    Text(verbatim: pokemonViewModel.detailedPokemon[0].name)
+                        .font(.largeTitle).bold()
                         .foregroundColor(.white)
-                        .opacity(0.8)
                         .padding([.leading], 16)
-                }
-                
-                HStack {
-                    Spacer()
-                    VStack(alignment: .center) {
-                        Text("#\(pokemon[0].number)")
-                            .font(.largeTitle)
+                    if let first = pokemonViewModel.detailedPokemon[0].types.first ?? "" {
+                        Text("\(first) type Pokemon")
+                            .font(.subheadline).italic()
                             .foregroundColor(.white)
-
-                        Text(verbatim: pokemon[0].name)
-                            .font(.largeTitle).bold()
-                            .foregroundColor(.white)
+                            .opacity(0.8)
                             .padding([.leading], 16)
                     }
+                    
+                    HStack(alignment: .center) {
+                        Spacer()
+                        AsyncImage(
+                            url: URL(string: pokemonViewModel.detailedPokemon[0].image)!,
+                            placeholder: { ProgressView() },
+                            image: { Image(uiImage: $0).resizable() }
+                        )
+                        .frame(width: 300, height: 300, alignment: .center)
+                        Spacer()
+                    }
+
+                    HStack {
+                        Spacer()
+                        VStack(alignment: .center) {
+                            Text("#\(pokemonViewModel.detailedPokemon[0].number)")
+                                .font(.largeTitle)
+                                .foregroundColor(.white)
+
+                            Text(verbatim: pokemonViewModel.detailedPokemon[0].name)
+                                .font(.largeTitle).bold()
+                                .foregroundColor(.white)
+                                .padding([.leading], 16)
+                        }
+                        Spacer()
+                    }
+                    
                     Spacer()
                 }
-                
-                Spacer()
             }
+            
         }
         .edgesIgnoringSafeArea(.all)
         .navigationBarItems(leading: btnBack)
@@ -76,49 +93,7 @@ struct PokemonView: View {
     }
     
     func loadData() {
-        guard let url = URL(string: pokemonUrl) else {
-            print("Invalid URL")
-            return
-        }
-        
-        print(url)
-        
-        let request = URLRequest(url: url)
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let data = data {
-                if let decodedResponse = try? JSONDecoder().decode([User].self, from: data) {
-                    DispatchQueue.main.async {
-                        self.pokemon = decodedResponse
-                        let type: PokemonType = PokemonType(rawValue: pokemon[0].types.first ?? "") ?? .Fire
-                        switch type {
-                        case .Bug, .Grass, .Dragon : self.color = .green
-                        case .Electric:
-                            self.color = .yellow
-                        case .Fire:
-                            self.color = .red
-                        case .Poison, .Psychic, .Dark, .Ghost:
-                            self.color = .purple
-                        case .Rock, .Steel:
-                            self.color = .gray
-                        case .Water, .Flying, .Ice:
-                            self.color = .blue
-                        default:
-                            self.color = .orange
-                        }
-                        self.pokemonImage = pokemon[0].sprite
-                        withAnimation(Animation.easeIn(duration: animationDuration)) {
-                            self.xScale = 4
-                            self.yScale = 4
-                        }
-                        
-                    }
-                    
-                    return
-                }
-            }
-            print("Fetch failed: \(error?.localizedDescription ?? "Unknown")")
-        }.resume()
+        pokemonViewModel.fetchPokemon(endpoint: .pokemon(name))
     }
     
     var btnBack : some View { Button(action: {
@@ -139,7 +114,7 @@ struct PokemonView: View {
 struct PokemonView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            PokemonView(pokemonUrl: "https://pokeapi.glitch.me/v1/pokemon/1", backgroundColor: .white)
+            PokemonView(name: "Bulbasaur")
         }
     }
 }

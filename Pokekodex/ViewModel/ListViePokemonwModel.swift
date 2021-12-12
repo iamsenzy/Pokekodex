@@ -12,7 +12,7 @@ class PokemonListViewModel: ObservableObject {
     @Published var pokemons = [ListViePokemonwModel]()
     private let apiManager: APIManager = APIManager()
     
-    func fetchUsers(endpoint: URLEndPoint) {
+    func fetchPokemons(endpoint: URLEndPoint) {
         let url = URL(string: endpoint.urlString)!
         
         apiManager.fetch(url: url) { (result: Result<PokemonResults, Error>) in
